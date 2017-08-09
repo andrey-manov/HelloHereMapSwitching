@@ -1,0 +1,118 @@
+--------------------------------------------------------------------------------
+01 Nov 2016
+--------------------------------------------------------------------------------
+The add-in to the HERE iOS Starter SDK allows map info bubble customization.
+
+The users need to link to libHEREMapInfoBubbleCustomizer.a static library and
+use the NMAMapInfoBubbleCustomizer.h file classes:
+
+NMAMapInfoBubbleCustomizationContext class: This class is responsible for all
+the customizable values for an info bubble. Please note that any setting not
+specified, keeps its default value.
+
+NMAMapInfoBubbleCustomizer: This class is responsible for all the customization
+possible for the map info bubbles. It has only one method, a class method, which
+needs to be called before any map marker is used.
+
+--------------------------------------------------------------------------------
+Sample usage
+--------------------------------------------------------------------------------
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+
+    // Create a map info bubble customization context
+    context = [[NMAMapInfoBubbleCustomizationContext alloc] init];
+
+    // Any setting not specified, keeps its default value
+    context.titleLabel.font = [UIFont boldSystemFontOfSize:25.5f];
+    context.titleLabel.textColor = [UIColor redColor];
+    context.descriptionLabel.font = [UIFont systemFontOfSize:15.0f];
+    context.descriptionLabel.textColor = [UIColor redColor];
+    context.bubbleFillColor = [UIColor yellowColor];
+    context.bubbleStrokeColor = [UIColor redColor];
+    context.bubbleMaxWidth = 140.0f;
+    context.bubbleAlpha = 0.6f;
+    context.bubbleCornerRadius = 6.0f;
+    context.bubblePadding = 5.0f;
+
+    // Set it for all the map markers
+    [NMAMapInfoBubbleCustomizer customize:context];
+...
+}
+
+- (void)someMethodUsingTextBasedMapInfoBubble
+{
+...
+    UIImage *image = [UIImage imageNamed:@"marker_image.png"];
+    NMAMapMarker *marker = [NMAMapMarker mapMarkerWithGeoCoordinates:currentLocation
+                                                               image:image];
+
+    marker.title = @"Sports Shop";
+    marker.textDescription = @"We cover all the sports! We provide the best brands!";
+    marker.infoBubbleEventBlock = ^void () {
+        UIAlertController *infoAlert = [UIAlertController alertControllerWithTitle:@"Info bubble tapped!"
+                                                                           message:nil
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction *close = [UIAlertAction actionWithTitle:@"Close"
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:nil];
+
+        [infoAlert addAction:close];
+
+        [self presentViewController:infoAlert animated:YES completion:nil];
+    };
+
+    [self.mapView addMapObject:marker];
+    [marker showInfoBubble];
+...
+}
+
+// Calls the new [NMAMapMarker showInfoBubble:] method
+// See NMAMapInfoBubbleCustomizer.h
+//
+- (void)someMethodUsingViewBasedMapInfoBubble
+{
+...
+    UIImage *image = [UIImage imageNamed:@"marker_image.png"];
+    NMAMapMarker *marker = [NMAMapMarker mapMarkerWithGeoCoordinates:currentLocation
+                                                               image:image];
+
+    marker.infoBubbleEventBlock = ^void () {
+        UIAlertController *infoAlert = [UIAlertController alertControllerWithTitle:@"Info bubble tapped!"
+                                                                           message:nil
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction *close = [UIAlertAction actionWithTitle:@"Close"
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:nil];
+
+        [infoAlert addAction:close];
+
+        [self presentViewController:infoAlert animated:YES completion:nil];
+    };
+
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 120, 50)];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 100, 30)];
+
+    view.backgroundColor = [UIColor redColor];
+    label.textColor = [UIColor whiteColor];
+    label.text = @"See more?";
+    label.textAlignment = NSTextAlignmentCenter;
+    [view addSubview:label];
+
+    [self.mapView addMapObject:marker];
+    [marker showInfoBubble:view];
+...
+}
+
+--------------------------------------------------------------------------------
+Known Issues
+--------------------------------------------------------------------------------
+The library may generate the following drawing problems which are not observed
+with the most recent code:
+
+... Failed to bind EAGLDrawable: <CAEAGLLayer: 0x12559bf30> to GL_RENDERBUFFER 4
+... Failed to make complete multisample framebuffer object 8cd6
+... Failed to make complete framebuffer object 8cd6
